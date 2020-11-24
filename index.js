@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { ApolloServer } = require("apollo-server");
 const typeDefs = require("./gql/schema");
 const resolvers = require("./gql/resolvers");
+const { compareToken } = require("./utils/token");
 
 require("dotenv").config({ path: ".env" });
 
@@ -26,6 +27,7 @@ function server() {
   const serverApollo = new ApolloServer({
     typeDefs,
     resolvers,
+    context: ({ req }) => compareToken(req.headers.authorization),
   });
 
   serverApollo.listen().then(({ url }) => {

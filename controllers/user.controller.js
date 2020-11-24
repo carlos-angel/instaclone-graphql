@@ -1,6 +1,7 @@
 const { User } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const awsUploadImage = require("../utils/aws-upload-image");
 
 function createToken(user, SECRET_KEY, expiresIn) {
   const { id, name, email, username } = user;
@@ -85,8 +86,43 @@ async function getUser(id, username) {
   return user;
 }
 
+async function updateAvatar(file, context) {
+  const { id } = context.user;
+
+  const { createReadStream, mimetype } = await file;
+  const extension = mimetype.split("/")[1];
+  const imageName = `avatar/${id}.${extension}`;
+  const fileData = createReadStream();
+
+  try {
+    const result = await awsUploadImage(fileData, imageName);
+    await User.findByIdAndUpdate(id, { avatar: result });
+    return {
+      status: true,
+      urlAvatar: result,
+    };
+  } catch (error) {
+    return {
+      status: false,
+      urlAvatar: null,
+    };
+  }
+}
+
+async function deleteAvatar(context) {
+  const { id } = context.user;
+  try {
+    await User.findByIdAndUpdate(id, { avatar: "" });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 module.exports = {
   register,
   login,
   getUser,
+  updateAvatar,
+  deleteAvatar,
 };
