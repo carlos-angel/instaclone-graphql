@@ -119,10 +119,38 @@ async function deleteAvatar(context) {
   }
 }
 
+async function updateUser(input, context) {
+  const { id } = context.user;
+  try {
+    if (input.currentPassword && input.newPassword) {
+      const userFound = await User.findById(id);
+      const passwordSuccess = await bcrypt.compare(
+        input.currentPassword,
+        userFound.password
+      );
+      if (!passwordSuccess) {
+        throw new Error("contraseña incorrecta");
+      }
+
+      const salt = await bcrypt.genSaltSync(10);
+      const newPasswordCrypt = await bcrypt.hash(input.newPassword, salt);
+
+      await User.findByIdAndUpdate(id, { password: newPasswordCrypt });
+    } else {
+      await User.findByIdAndUpdate(id, input);
+    }
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 module.exports = {
   register,
   login,
   getUser,
   updateAvatar,
   deleteAvatar,
+  updateUser,
 };
