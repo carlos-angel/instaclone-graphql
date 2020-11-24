@@ -1,10 +1,14 @@
-const { UserController } = require("../controllers");
+const { UserController, FollowController } = require("../controllers");
 
 const resolvers = {
   Query: {
     // User
     getUser: (_, { id, username }) => UserController.getUser(id, username),
     search: (_, { search }) => UserController.search(search),
+
+    // Follow
+    isFollow: (_, { username }, context) =>
+      FollowController.isFollow(username, context),
   },
   Mutation: {
     // User
@@ -15,6 +19,11 @@ const resolvers = {
     deleteAvatar: (_, {}, context) => UserController.deleteAvatar(context),
     updateUser: (_, { input }, context) =>
       UserController.updateUser(input, context),
+    // Follow
+    follow: (_, { username }, context) =>
+      FollowController.follow(username, context),
+    unFollow: (_, { username }, context) =>
+      FollowController.unFollow(username, context),
   },
 };
 
