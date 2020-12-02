@@ -1,4 +1,8 @@
-const { UserController, FollowController } = require("../controllers");
+const {
+  UserController,
+  FollowController,
+  PublicationController,
+} = require("../controllers");
 
 const resolvers = {
   Query: {
@@ -26,6 +30,10 @@ const resolvers = {
       FollowController.follow(username, context),
     unFollow: (_, { username }, context) =>
       FollowController.unFollow(username, context),
+
+    //Publication
+    publish: (_, { file }, context) =>
+      PublicationController.publish(file, context),
   },
 };
 

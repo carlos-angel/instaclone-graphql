@@ -22,6 +22,11 @@ const typeDefs = gql`
     urlAvatar: String
   }
 
+  type Publish {
+    status: Boolean
+    urlFile: String
+  }
+
   input UserInput {
     name: String!
     username: String!
@@ -65,6 +70,9 @@ const typeDefs = gql`
     #Follow
     follow(username: String!): Boolean
     unFollow(username: String!): Boolean
+
+    #Publication
+    publish(file: Upload): Publish
   }
 `;
 
