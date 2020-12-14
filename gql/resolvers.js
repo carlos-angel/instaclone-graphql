@@ -2,6 +2,7 @@ const {
   UserController,
   FollowController,
   PublicationController,
+  CommentController
 } = require("../controllers");
 
 const resolvers = {
@@ -19,6 +20,10 @@ const resolvers = {
     // Publication
     getPublications: (_, { username }) =>
       PublicationController.getPublications(username),
+
+    // Comment
+    getComments: (_, { idPublication }) =>
+      CommentController.getComments(idPublication)
   },
   Mutation: {
     // User
@@ -38,7 +43,11 @@ const resolvers = {
     //Publication
     publish: (_, { file }, context) =>
       PublicationController.publish(file, context),
-  },
+
+    //Comment
+    addComment: (_, { input }, context) =>
+      CommentController.addComment(input, context)
+  }
 };
 
 module.exports = resolvers;
