@@ -83,6 +83,10 @@ const typeDefs = gql`
 
     #comment
     getComments(idPublication: ID!): [Comment]
+
+    #like
+    isLike(idPublication: ID!): Boolean
+    countLikes(idPublication: ID!): Int
   }
 
   type Mutation {
@@ -102,6 +106,10 @@ const typeDefs = gql`
 
     #Comment
     addComment(input: CommentInput): Comment
+
+    #Like
+    addLike(idPublication: ID!): Boolean
+    deleteLike(idPublication: ID!): Boolean
   }
 `;
 

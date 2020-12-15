@@ -2,7 +2,8 @@ const {
   UserController,
   FollowController,
   PublicationController,
-  CommentController
+  CommentController,
+  LikeController
 } = require("../controllers");
 
 const resolvers = {
@@ -23,7 +24,11 @@ const resolvers = {
 
     // Comment
     getComments: (_, { idPublication }) =>
-      CommentController.getComments(idPublication)
+      CommentController.getComments(idPublication),
+    
+    // like
+    isLike: (_, {idPublication}, context) => LikeController.isLike(idPublication, context),
+    countLikes: (_, {idPublication}) => LikeController.countLikes(idPublication)
   },
   Mutation: {
     // User
@@ -46,7 +51,11 @@ const resolvers = {
 
     //Comment
     addComment: (_, { input }, context) =>
-      CommentController.addComment(input, context)
+      CommentController.addComment(input, context),
+
+    //like
+    addLike: (_, {idPublication}, context) => LikeController.addLike(idPublication, context),
+    deleteLike: (_, {idPublication}, context) => LikeController.deleteLike(idPublication, context)
   }
 };
 
