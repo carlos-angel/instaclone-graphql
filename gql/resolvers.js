@@ -21,14 +21,18 @@ const resolvers = {
     // Publication
     getPublications: (_, { username }) =>
       PublicationController.getPublications(username),
+    getPublicationsFolloweds: (_, {}, { user }) =>
+      PublicationController.getPublicationsFolloweds(user),
 
     // Comment
     getComments: (_, { idPublication }) =>
       CommentController.getComments(idPublication),
-    
+
     // like
-    isLike: (_, {idPublication}, context) => LikeController.isLike(idPublication, context),
-    countLikes: (_, {idPublication}) => LikeController.countLikes(idPublication)
+    isLike: (_, { idPublication }, context) =>
+      LikeController.isLike(idPublication, context),
+    countLikes: (_, { idPublication }) =>
+      LikeController.countLikes(idPublication)
   },
   Mutation: {
     // User
@@ -54,8 +58,10 @@ const resolvers = {
       CommentController.addComment(input, context),
 
     //like
-    addLike: (_, {idPublication}, context) => LikeController.addLike(idPublication, context),
-    deleteLike: (_, {idPublication}, context) => LikeController.deleteLike(idPublication, context)
+    addLike: (_, { idPublication }, context) =>
+      LikeController.addLike(idPublication, context),
+    deleteLike: (_, { idPublication }, context) =>
+      LikeController.deleteLike(idPublication, context)
   }
 };
 
