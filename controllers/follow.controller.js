@@ -7,7 +7,7 @@ async function follow(username, context) {
 
     const follow = new Follow({
       idUser: context.user.id,
-      follow: userFound._id,
+      follow: userFound._id
     });
     follow.save();
     return true;
@@ -69,10 +69,34 @@ async function getFolloweds(username) {
   return followedsList;
 }
 
+async function getNotFolloweds(userLogged) {
+  const arrayUsers = [];
+  try {
+    const users = await User.find().limit(30);
+
+    for await (const user of users) {
+      const isFind = await Follow.findOne({ idUser: user.id })
+        .where("follow")
+        .equals(user._id);
+
+      if (!isFind) {
+        if (user._id.toString() !== userLogged.id.toString()) {
+          arrayUsers.push(user);
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+  return arrayUsers;
+}
+
 module.exports = {
   follow,
   isFollow,
   unFollow,
   getFollowers,
   getFolloweds,
+  getNotFolloweds
 };
