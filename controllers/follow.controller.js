@@ -1,4 +1,5 @@
 const { User, Follow } = require("../models");
+const errorHandler = require("../utils/errorHandler");
 
 async function follow(username, context) {
   try {
@@ -12,61 +13,80 @@ async function follow(username, context) {
     follow.save();
     return true;
   } catch (error) {
-    console.error(error.message);
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
 async function isFollow(username, context) {
-  const userFound = await User.findOne({ username });
-  if (!userFound) throw new Error("Usuario no encontrado");
+  try {
+    const userFound = await User.findOne({ username });
+    if (!userFound) throw new Error("Usuario no encontrado");
 
-  const follow = await Follow.find({ idUser: context.user.id })
-    .where("follow")
-    .equals(userFound._id);
+    const follow = await Follow.find({ idUser: context.user.id })
+      .where("follow")
+      .equals(userFound._id);
 
-  if (!follow || follow <= 0) return false;
+    if (!follow || follow <= 0) return false;
 
-  return true;
+    return true;
+  } catch (error) {
+    errorHandler("Internal error", error);
+  }
 }
 
 async function unFollow(username, context) {
-  const userFound = await User.findOne({ username });
-  if (!userFound) throw new Error("Usuario no encontrado");
+  try {
+    const userFound = await User.findOne({ username });
+    if (!userFound) throw new Error("Usuario no encontrado");
 
-  const follow = await Follow.deleteOne({ idUser: context.user.id })
-    .where("follow")
-    .equals(userFound._id);
+    const follow = await Follow.deleteOne({ idUser: context.user.id })
+      .where("follow")
+      .equals(userFound._id);
 
-  if (!follow || follow.deletedCount <= 0) return false;
+    if (!follow || follow.deletedCount <= 0) return false;
 
-  return true;
+    return true;
+  } catch (error) {
+    errorHandler("Internal error", error);
+  }
 }
 
 async function getFollowers(username) {
-  const user = await User.findOne({ username });
+  try {
+    const user = await User.findOne({ username });
 
-  const followers = await Follow.find({ follow: user._id }).populate("idUser");
+    const followers = await Follow.find({ follow: user._id }).populate(
+      "idUser"
+    );
 
-  const followersList = [];
-  for await (const data of followers) {
-    followersList.push(data.idUser);
+    const followersList = [];
+    for await (const data of followers) {
+      followersList.push(data.idUser);
+    }
+
+    return followersList;
+  } catch (error) {
+    errorHandler("Internal error", error);
   }
-
-  return followersList;
 }
 
 async function getFolloweds(username) {
-  const user = await User.findOne({ username });
+  try {
+    const user = await User.findOne({ username });
 
-  const followeds = await Follow.find({ idUser: user._id }).populate("follow");
+    const followeds = await Follow.find({ idUser: user._id }).populate(
+      "follow"
+    );
 
-  const followedsList = [];
-  for await (const data of followeds) {
-    followedsList.push(data.follow);
+    const followedsList = [];
+    for await (const data of followeds) {
+      followedsList.push(data.follow);
+    }
+
+    return followedsList;
+  } catch (error) {
+    errorHandler("Internal error", error);
   }
-
-  return followedsList;
 }
 
 async function getNotFolloweds(userLogged) {
@@ -86,7 +106,7 @@ async function getNotFolloweds(userLogged) {
       }
     }
   } catch (error) {
-    console.log(error);
+    errorHandler("Internal error", error);
   }
 
   return arrayUsers;

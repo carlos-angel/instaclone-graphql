@@ -1,4 +1,5 @@
 const { Comment } = require("../models");
+const errorHandler = require("../utils/errorHandler");
 
 function addComment(input, context) {
   try {
@@ -10,8 +11,7 @@ function addComment(input, context) {
     comment.save();
     return comment;
   } catch (error) {
-    console.log(error);
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
@@ -20,7 +20,7 @@ async function getComments(idPublication) {
     const comments = await Comment.find({ idPublication }).populate("idUser");
     return comments;
   } catch (error) {
-    console.error(error);
+    errorHandler("Internal error", error);
   }
 }
 

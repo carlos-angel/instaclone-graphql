@@ -1,6 +1,7 @@
-const {Like} = require("../models");
+const { Like } = require("../models");
+const errorHandler = require("../utils/errorHandler");
 
-function addLike(idPublication, context){
+function addLike(idPublication, context) {
   try {
     const like = new Like({
       idPublication,
@@ -10,40 +11,41 @@ function addLike(idPublication, context){
     like.save();
     return true;
   } catch (error) {
-    console.log(error);
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
-async function deleteLike(idPublication, context){
+async function deleteLike(idPublication, context) {
   try {
-    await Like.findOneAndDelete({ idPublication }).where({idUser: context.user.id});
+    await Like.findOneAndDelete({ idPublication }).where({
+      idUser: context.user.id
+    });
     return true;
   } catch (error) {
-    console.log(error);
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
-async function isLike(idPublication, context){
+async function isLike(idPublication, context) {
   try {
-    const result = await Like.findOne({idPublication}).where({idUser: context.user.id});
-    if(!result){
+    const result = await Like.findOne({ idPublication }).where({
+      idUser: context.user.id
+    });
+    if (!result) {
       return false;
     }
     return true;
   } catch (error) {
-    console.log(error);
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
-async function countLikes(idPublication){
+async function countLikes(idPublication) {
   try {
-    const likes = await Like.countDocuments({idPublication});
+    const likes = await Like.countDocuments({ idPublication });
     return likes;
   } catch (error) {
-    console.log(error);
+    errorHandler("Internal error", error);
   }
 }
 
@@ -52,4 +54,4 @@ module.exports = {
   deleteLike,
   isLike,
   countLikes
-}
+};

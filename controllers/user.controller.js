@@ -2,81 +2,91 @@ const { User } = require("../models");
 const { encryptPassword, comparePassword } = require("../utils/encrypt");
 const token = require("../utils/token");
 const awsUploadImage = require("../utils/aws-upload-image");
+const errorHandler = require("../utils/errorHandler");
 
 async function register(input) {
-  const newUser = input;
-  newUser.email = newUser.email.toLowerCase();
-  newUser.username = newUser.username.toLowerCase();
-
-  const { email, username, password } = newUser;
-
-  // Revisar si el email esta en uso
-  const foundEmail = await User.findOne({ email });
-  if (foundEmail) {
-    throw new Error("Username o email no valido");
-  }
-
-  // Revisar si el username esta en uso
-  const foundUsername = await User.findOne({ username });
-  if (foundUsername) {
-    throw new Error("Username o email no valido");
-  }
-
-  // Encriptar
-  newUser.password = await encryptPassword(password);
   try {
+    const newUser = input;
+    newUser.email = newUser.email.toLowerCase();
+    newUser.username = newUser.username.toLowerCase();
+
+    const { email, username, password } = newUser;
+
+    // Revisar si el email esta en uso
+    const foundEmail = await User.findOne({ email });
+    if (foundEmail) {
+      errorHandler("Username o email no valido");
+    }
+
+    // Revisar si el username esta en uso
+    const foundUsername = await User.findOne({ username });
+    if (foundUsername) {
+      errorHandler("Username o email no valido");
+    }
+
+    // Encriptar
+    newUser.password = await encryptPassword(password);
+
     const user = new User(newUser);
     user.save();
     return user;
   } catch (error) {
-    console.log(error);
+    errorHandler("Internal error", error);
   }
 }
 
 async function login(input) {
-  const { email, password } = input;
+  try {
+    const { email, password } = input;
 
-  const userFound = await User.findOne({ email: email.toLowerCase() });
-  if (!userFound) {
-    throw new Error("Error en el email o contraseña");
+    const userFound = await User.findOne({ email: email.toLowerCase() });
+    if (!userFound) {
+      errorHandler("contraseña y/o email no validos");
+    }
+
+    const passwordSuccess = await comparePassword(password, userFound.password);
+    if (!passwordSuccess) {
+      errorHandler("contraseña y/o email no validos");
+    }
+
+    const result = token.createToken(userFound);
+
+    return {
+      token: result
+    };
+  } catch (error) {
+    errorHandler("Internal error", error);
   }
-
-  const passwordSuccess = await comparePassword(password, userFound.password);
-  if (!passwordSuccess) {
-    throw new Error("Error en el email o contraseña");
-  }
-
-  const result = token.createToken(userFound);
-
-  return {
-    token: result
-  };
 }
 
 async function getUser(id, username) {
   let user = null;
-  if (id) {
-    user = await User.findById(id);
-  } else if (username) {
-    user = await User.findOne({ username });
-  }
+  try {
+    if (id) {
+      user = await User.findById(id);
+    } else if (username) {
+      user = await User.findOne({ username });
+    }
 
-  if (!user) {
-    throw new Error("El usuario no existe");
+    if (!user) {
+      errorHandler("usuario no encontrado");
+    }
+  } catch (error) {
+    errorHandler("Internal error", error);
   }
 
   return user;
 }
 
 async function updateAvatar(file, context) {
-  const { id } = context.user;
-
-  const { createReadStream, mimetype } = await file;
-  const extension = mimetype.split("/")[1];
-  const imageName = `avatar/${id}.${extension}`;
-  const fileData = createReadStream();
-
   try {
+    const { id } = context.user;
+
+    const { createReadStream, mimetype } = await file;
+    const extension = mimetype.split("/")[1];
+    const imageName = `avatar/${id}.${extension}`;
+    const fileData = createReadStream();
+
     const result = await awsUploadImage(fileData, imageName);
     await User.findByIdAndUpdate(id, { avatar: result });
     return {
@@ -84,10 +94,7 @@ async function updateAvatar(file, context) {
       urlAvatar: result
     };
   } catch (error) {
-    return {
-      status: false,
-      urlAvatar: null
-    };
+    errorHandler("Internal error", error);
   }
 }
 
@@ -97,7 +104,7 @@ async function deleteAvatar(context) {
     await User.findByIdAndUpdate(id, { avatar: "" });
     return true;
   } catch (error) {
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
@@ -111,7 +118,7 @@ async function updateUser(input, context) {
         userFound.password
       );
       if (!passwordSuccess) {
-        throw new Error("contraseña incorrecta");
+        errorHandler("contraseña incorrecta", error);
       }
 
       const newPasswordCrypt = await encryptPassword(input.newPassword);
@@ -123,13 +130,17 @@ async function updateUser(input, context) {
 
     return true;
   } catch (error) {
-    return false;
+    errorHandler("Internal error", error);
   }
 }
 
 async function search(search) {
-  const users = await User.find({ name: { $regex: search, $options: "i" } });
-  return users;
+  try {
+    const users = await User.find({ name: { $regex: search, $options: "i" } });
+    return users;
+  } catch (error) {
+    errorHandler("Internal error", error);
+  }
 }
 
 module.exports = {
