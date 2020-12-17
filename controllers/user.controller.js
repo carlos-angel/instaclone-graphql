@@ -1,5 +1,5 @@
 const { User } = require("../models");
-const bcrypt = require("bcryptjs");
+const { encryptPassword, comparePassword } = require("../utils/encrypt");
 const token = require("../utils/token");
 const awsUploadImage = require("../utils/aws-upload-image");
 
@@ -23,9 +23,7 @@ async function register(input) {
   }
 
   // Encriptar
-  const salt = await bcrypt.genSaltSync(10);
-  newUser.password = await bcrypt.hash(password, salt);
-
+  newUser.password = await encryptPassword(password);
   try {
     const user = new User(newUser);
     user.save();
@@ -43,7 +41,7 @@ async function login(input) {
     throw new Error("Error en el email o contraseña");
   }
 
-  const passwordSuccess = await bcrypt.compare(password, userFound.password);
+  const passwordSuccess = await comparePassword(password, userFound.password);
   if (!passwordSuccess) {
     throw new Error("Error en el email o contraseña");
   }
@@ -108,7 +106,7 @@ async function updateUser(input, context) {
   try {
     if (input.currentPassword && input.newPassword) {
       const userFound = await User.findById(id);
-      const passwordSuccess = await bcrypt.compare(
+      const passwordSuccess = await comparePassword(
         input.currentPassword,
         userFound.password
       );
@@ -116,8 +114,7 @@ async function updateUser(input, context) {
         throw new Error("contraseña incorrecta");
       }
 
-      const salt = await bcrypt.genSaltSync(10);
-      const newPasswordCrypt = await bcrypt.hash(input.newPassword, salt);
+      const newPasswordCrypt = await encryptPassword(input.newPassword);
 
       await User.findByIdAndUpdate(id, { password: newPasswordCrypt });
     } else {
