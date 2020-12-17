@@ -1,20 +1,20 @@
-require("dotenv").config({ path: ".env" });
+const { aws } = require("../config");
 const AWS = require("aws-sdk");
 
-const ID = process.env.AWS_ID;
-const SECRET = process.env.AWS_SECRET;
-const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+const ID = aws.id;
+const SECRET = aws.secret;
+const BUCKET_NAME = aws.bucket;
 
 const s3 = new AWS.S3({
   accessKeyId: ID,
-  secretAccessKey: SECRET,
+  secretAccessKey: SECRET
 });
 
 async function awsUploadImage(file, filePath) {
   const params = {
     Bucket: BUCKET_NAME,
     Key: `${filePath}`,
-    Body: file,
+    Body: file
   };
 
   try {
