@@ -1,19 +1,7 @@
 const { User } = require("../models");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const token = require("../utils/token");
 const awsUploadImage = require("../utils/aws-upload-image");
-
-function createToken(user, SECRET_KEY, expiresIn) {
-  const { id, name, email, username } = user;
-  const payload = {
-    id,
-    name,
-    email,
-    username,
-  };
-
-  return jwt.sign(payload, SECRET_KEY, { expiresIn });
-}
 
 async function register(input) {
   const newUser = input;
@@ -60,14 +48,10 @@ async function login(input) {
     throw new Error("Error en el email o contraseña");
   }
 
-  token = createToken(
-    userFound,
-    process.env.SECRET_KEY,
-    process.env.EXPIRES_IN
-  );
+  const result = token.createToken(userFound);
 
   return {
-    token,
+    token: result
   };
 }
 
@@ -99,12 +83,12 @@ async function updateAvatar(file, context) {
     await User.findByIdAndUpdate(id, { avatar: result });
     return {
       status: true,
-      urlAvatar: result,
+      urlAvatar: result
     };
   } catch (error) {
     return {
       status: false,
-      urlAvatar: null,
+      urlAvatar: null
     };
   }
 }
@@ -158,5 +142,5 @@ module.exports = {
   updateAvatar,
   deleteAvatar,
   updateUser,
-  search,
+  search
 };

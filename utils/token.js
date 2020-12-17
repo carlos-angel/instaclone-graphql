@@ -1,15 +1,12 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config({ path: ".env" });
+const { auth } = require("../config");
 
-const compareToken = (token) => {
+const compareToken = token => {
   if (token) {
     try {
-      const user = jwt.verify(
-        token.replace("Bearer ", ""),
-        process.env.SECRET_KEY
-      );
+      const user = jwt.verify(token.replace("Bearer ", ""), auth.secret);
       return {
-        user,
+        user
       };
     } catch (error) {
       console.log("###error###");
@@ -19,6 +16,19 @@ const compareToken = (token) => {
   }
 };
 
+const createToken = user => {
+  const { id, name, email, username } = user;
+  const payload = {
+    id,
+    name,
+    email,
+    username
+  };
+
+  return jwt.sign(payload, auth.secret, { expiresIn: auth.expiresIn });
+};
+
 module.exports = {
   compareToken,
+  createToken
 };
