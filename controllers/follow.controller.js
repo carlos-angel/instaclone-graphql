@@ -92,7 +92,7 @@ async function getFolloweds(username) {
 async function getNotFolloweds(userLogged) {
   const arrayUsers = [];
   try {
-    const users = await User.find().limit(30);
+    const users = await User.find().limit(6);
 
     for await (const user of users) {
       const isFind = await Follow.findOne({ idUser: user.id })
