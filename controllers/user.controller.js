@@ -3,6 +3,7 @@ const { encryptPassword, comparePassword } = require("../utils/encrypt");
 const token = require("../utils/token");
 const awsUploadImage = require("../utils/aws-upload-image");
 const errorHandler = require("../utils/errorHandler");
+const { v4: uuidv4 } = require("uuid");
 
 async function register(input) {
   try {
@@ -84,7 +85,7 @@ async function updateAvatar(file, context) {
 
     const { createReadStream, mimetype } = await file;
     const extension = mimetype.split("/")[1];
-    const imageName = `avatar/${id}.${extension}`;
+    const imageName = `avatar/${uuidv4()}.${extension}`;
     const fileData = createReadStream();
 
     const result = await awsUploadImage(fileData, imageName);
