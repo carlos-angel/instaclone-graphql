@@ -1,4 +1,5 @@
 const {
+  AuthController,
   UserController,
   FollowController,
   PublicationController,
@@ -8,8 +9,9 @@ const {
 
 module.exports = {
   // User
-  register: (_, { input }) => UserController.register(input),
-  login: (_, { input }) => UserController.login(input),
+  register: (_, { input }) => AuthController.register({ user: input }),
+  login: (_, { input }) =>
+    AuthController.login({ email: input.email, password: input.password }),
   updateAvatar: (_, { file }, context) =>
     UserController.updateAvatar(file, context),
   deleteAvatar: (_, {}, context) => UserController.deleteAvatar(context),

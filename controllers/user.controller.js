@@ -1,64 +1,8 @@
 const { User } = require("../models");
 const { encryptPassword, comparePassword } = require("../utils/encrypt");
-const token = require("../utils/token");
 const awsUploadImage = require("../utils/aws-upload-image");
 const errorHandler = require("../utils/errorHandler");
 const { v4: uuidv4 } = require("uuid");
-
-async function register(input) {
-  try {
-    const newUser = input;
-    newUser.email = newUser.email.toLowerCase();
-    newUser.username = newUser.username.toLowerCase();
-
-    const { email, username, password } = newUser;
-
-    // Revisar si el email esta en uso
-    const foundEmail = await User.findOne({ email });
-    if (foundEmail) {
-      errorHandler("Username o email no valido");
-    }
-
-    // Revisar si el username esta en uso
-    const foundUsername = await User.findOne({ username });
-    if (foundUsername) {
-      errorHandler("Username o email no valido");
-    }
-
-    // Encriptar
-    newUser.password = await encryptPassword(password);
-
-    const user = new User(newUser);
-    user.save();
-    return user;
-  } catch (error) {
-    errorHandler("Internal error", error);
-  }
-}
-
-async function login(input) {
-  try {
-    const { email, password } = input;
-
-    const userFound = await User.findOne({ email: email.toLowerCase() });
-    if (!userFound) {
-      errorHandler("contraseña y/o email no validos");
-    }
-
-    const passwordSuccess = await comparePassword(password, userFound.password);
-    if (!passwordSuccess) {
-      errorHandler("contraseña y/o email no validos");
-    }
-
-    const result = token.createToken(userFound);
-
-    return {
-      token: result
-    };
-  } catch (error) {
-    errorHandler("Internal error", error);
-  }
-}
 
 async function getUser(id, username) {
   let user = null;
@@ -145,8 +89,6 @@ async function search(search) {
 }
 
 module.exports = {
-  register,
-  login,
   getUser,
   updateAvatar,
   deleteAvatar,
