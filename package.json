@@ -21,6 +21,7 @@
     "apollo-server": "^2.19.0",
     "aws-sdk": "^2.798.0",
     "bcryptjs": "^2.4.3",
+    "fs-capacitor": "^6.2.0",
     "graphql": "^15.5.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.11",
@@ -30,5 +31,9 @@
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "resolutions": {
+    "fs-capacitor": "^6.2.0",
+    "graphql-upload": "^11.0.0"
   }
 }
